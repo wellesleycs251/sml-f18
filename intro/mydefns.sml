@@ -16,7 +16,7 @@ fun hyp a b = Math.sqrt(Real.fromInt(sos a b))
 
 fun fact n = (* a recursive factorial function *)
   if n = 0 then
-    10
+    1
   else
     n * (fact (n - 1)) 
 
