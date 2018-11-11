@@ -1,6 +1,13 @@
 structure Utils = struct
 
-fun range lo hi = if lo >= hi then [] else lo :: (range (lo + 1) hi)
+fun range lo hi = 
+    if lo >= hi then 
+	[] 
+    else 
+	lo :: (range (lo + 1) hi)
+
+fun takeUpTo n xs = 
+    List.take(xs, Int.min(length xs, n))
 
 fun stringMake n chr = (* make a string with n copies of chr *)
   String.implode (List.map (fn _ => chr) (range 0 n))
