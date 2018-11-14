@@ -26,18 +26,19 @@ fun height Leaf = 0
 
 (* val sum_nodes = fn : int bintree -> int *)
 (* Returns the sum of node values in binary tree of ints *)
-fun sum_nodes Leaf = ()
-  | sum_nodes (Node(l,v,r)) = ()
+fun sum_nodes Leaf = 0
+  | sum_nodes (Node(l,v,r)) = v + (sum_nodes l) + (sum_nodes r)
 
 (* val inlist = fn : 'a bintree -> 'a list *)
 (* Returns a list of the node values in in-order *)
-fun inlist Leaf = ()
-  | inlist (Node(l,v,r)) = ()
+fun inlist Leaf = []
+  | inlist (Node(l,v,r)) = (inlist l) @ [v] @ (inlist r)
 
 (* val map_tree = fn : ('a -> 'b) -> 'a bintree -> 'b bintree *)
 (* maps function over every node in a binary tree *)
-fun map_tree f Leaf = ()
-  | map_tree f (Node(l,v,r)) = ()
+fun map_tree f Leaf = Leaf
+  | map_tree f (Node(l,v,r)) =
+    Node(map_tree f l, f v, map_tree f r)
 
 (* val fold_tree = fn : ('b * 'a * 'b -> 'b) -> 'b -> 'a bintree -> 'b *)
 (* binary tree accumulation *)
