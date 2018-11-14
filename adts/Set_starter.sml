@@ -95,29 +95,28 @@ structure ListSet :> SET = struct
     type ''a t = ''a list
 
     (* The empty set is the empty list. *)
-    val empty = []
+    val empty = [] 
 
     (* complete this structure by replacing "raise Unimplemented"
        with implementations of each function *)
-    fun singleton x = [x]
+    fun singleton x = raise Unimplemented
 			    
-    fun isEmpty [] = true
-      | isEmpty _  = false
+    fun isEmpty _ = raise Unimplemented
       
-    fun size xs = length xs
+    fun size xs = raise Unimplemented
 		       
-    fun member x ys = List.exists (fn y => y=x) ys
+    fun member x ys = raise Unimplemented
 			 
-    fun insert x ys = if not (member x ys) then x::ys else ys
+    fun insert x ys = raise Unimplemented
       
     fun delete _ = raise Unimplemented
     fun union _ = raise Unimplemented
     fun intersection _ = raise Unimplemented
     fun difference _ = raise Unimplemented
 			     
-    fun fromList xs = foldl (fn (x,set) => insert x set) empty xs
+    fun fromList xs = raise Unimplemented
 			   
-    fun toList xs = xs
+    fun toList xs = raise Unimplemented
 			 
     fun fromPred _ = raise Unimplementable (* impossible to implement! *)
     fun toPred _ = raise Unimplemented
