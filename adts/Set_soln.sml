@@ -145,10 +145,12 @@ val mem3 = ListSet.member 3 test
 val mem4 = ListSet.member 4 test
 val mem5 = ListSet.member 5 test
 val mem6 = ListSet.member 6 test
+			  
 val ints = ListSet.toList
                (ListSet.intersection
                    (ListSet.fromList [1,2,3])
                    (ListSet.fromList [3,4,5]))
+
 val diff = ListSet.toList
                (ListSet.difference
                     (ListSet.fromList [1,2,3])
