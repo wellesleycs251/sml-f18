@@ -137,7 +137,7 @@ end
 val test = ListSet.union
                (ListSet.fromList [1,2,3])
                (ListSet.fromList [3,4,5])
-val str  = ListSet.toString Int.toString test
+val str  = ListSet.toList test
 val mem0 = ListSet.member 0 test
 val mem1 = ListSet.member 1 test
 val mem2 = ListSet.member 2 test
@@ -145,11 +145,13 @@ val mem3 = ListSet.member 3 test
 val mem4 = ListSet.member 4 test
 val mem5 = ListSet.member 5 test
 val mem6 = ListSet.member 6 test
-val ints = ListSet.toString Int.toString
+			  
+val ints = ListSet.toList
                (ListSet.intersection
                    (ListSet.fromList [1,2,3])
                    (ListSet.fromList [3,4,5]))
-val diff = ListSet.toString Int.toString
+
+val diff = ListSet.toList
                (ListSet.difference
                     (ListSet.fromList [1,2,3])
                     (ListSet.fromList [3,4,5]))

@@ -1,0 +1,8 @@
+fun fib_iter n =
+  fib_tail n 0 0 1
+
+and fib_tail n i fib_i fib_i_plus_1 =
+    if i = n then
+	fib_i
+    else
+	fib_tail n (i + 1) fib_i_plus_1 (fib_i + fib_i_plus_1)

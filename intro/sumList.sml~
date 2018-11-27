@@ -1,0 +1,2 @@
+fun sumListRec [] = []
+  | sumListRec (fst :: rst) = fst + (sumListRec rst)
