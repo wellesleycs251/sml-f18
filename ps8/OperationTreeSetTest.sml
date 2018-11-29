@@ -7,9 +7,8 @@
        to delimit elements. Without this, groups of tests involving set
        strings effectively disappear due to uncaught errors. 
      * Rather than requiring all test cases to be converted to list of ints, 
-       leverages sumOfProduct datatypes and typeToString functions from Show
-       to handle test results that are lists of strings, bools, ints, 
-       and strings. 
+       leverages sumOfProduct datatypes and typeToString functions from Show to
+       handle test results that are lists of strings, bools, ints, and strings. 
    + [2018/11/10, lyn] Modified to supply to students
    + [Spring 2018, lyn] Created to streamline testing in drop folders
  *)
