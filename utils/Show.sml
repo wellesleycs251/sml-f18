@@ -13,6 +13,9 @@ structure Show =
 
       val string: string t = fn str => str
 
+      (* Lyn added this *)
+      val quotedString: string t = fn str => "\"" ^ str ^ "\""
+
       val fcn: ('a -> 'b) t = fn f => "<fn>"
 
       val list: 'a t -> 'a list t =

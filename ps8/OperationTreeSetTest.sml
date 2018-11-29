@@ -1,6 +1,15 @@
 (* Testing file for OperationTreeSet module *)
 
 (* History: 
+   + [2018/11/28, lyn] 
+     * Introduced canonicalizeSetString to deal with student set strings
+       without curlies and/or ones that use spaces rather than commas
+       to delimit elements. Without this, groups of tests involving set
+       strings effectively disappear due to uncaught errors. 
+     * Rather than requiring all test cases to be converted to list of ints, 
+       leverages sumOfProduct datatypes and typeToString functions from Show
+       to handle test results that are lists of strings, bools, ints, 
+       and strings. 
    + [2018/11/10, lyn] Modified to supply to students
    + [Spring 2018, lyn] Created to streamline testing in drop folders
  *)
@@ -9,10 +18,19 @@ use "../utils/Show.sml"; (* For showing integer lists *)
 use "../utils/Utils.sml"; (* For Utils.range *)
 use "OperationTreeSet.sml"; (* Student solution file *)
 
+signature OPERATION_TREE_SET_TEST = sig
+  (* empty signature to hide everything but stuff printed by side effect *)
+end
+
+structure OperationTreeSetTest :> OPERATION_TREE_SET_TEST = 
+
+struct
+
 open OperationTreeSet
+open Show 
 
 val range = Utils.range 
-val printIntList = (Show.list Show.int)
+(* val printIntList = (Show.list Show.int) *)
 
 (* Lyn sez: should really functorize the following tests. *)
 
@@ -35,9 +53,19 @@ val s1DifferenceS2 = difference s1 s2
 val s2DifferenceS1 = difference s2 s1
 val intersectionSmallDiffs = intersection s2DifferenceS1 s1DifferenceS2
 
+(*
+val tinySets = [
+    ("empty", empty), 
+    ("singleton7", singleton 7),
+    ("singleton42", singleton 42)
+]
+*)
+
 val smallSets = [
     ("empty", empty), 
     ("empty2",fromList []),
+    ("singleton7", singleton 7),
+    ("singleton42", singleton 42),
     ("set_1_2_3", fromList [1,2,3]), (* tests for quirks in odd-length lists *)
     ("s", s), 
     ("s1", s1), 
@@ -96,9 +124,17 @@ fun testMember set = List.filter (fn i => member i set) (range 0 101)
                      handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn)); [])
 fun testPred set = List.filter (toPred set) (range 0 101)
                    handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn)); [])
+
+(*
+val tinyMembers = mapNamedSet testMember tinySets   
+val tinyLists = mapNamedSet toList tinySets		    		    
+val tinyIsEmpties = mapNamedSet isEmpty tinySets		    
+val tinySizes = mapNamedSet size tinySets
+val tinyPreds = mapNamedSet testPred tinySets
+val tinyStrings = mapNamedSet (fn s => toString Int.toString s) tinySets
+*)
 			       
 val smallMembers = mapNamedSet testMember smallSets   
-
 val smallLists = mapNamedSet toList smallSets		    		    
 val smallIsEmpties = mapNamedSet isEmpty smallSets		    
 val smallSizes = mapNamedSet size smallSets
@@ -120,10 +156,50 @@ val bigSizes = mapNamedSet size bigSets
 val bigPreds = mapNamedSet testPred bigSets
 val bigStrings = mapNamedSet (fn s => toString Int.toString s) bigSets
 
+(*
+val tinyMembersSoln = [
+    ("empty",[]),
+    ("singleton7",[7]),
+    ("singleton42",[42])
+]
+
+val tinyListsSoln = [
+    ("empty",[]),
+    ("singleton7",[7]),
+    ("singleton42",[42])
+]
+
+val tinyIsEmptiesSoln = [
+    ("empty",true),
+    ("singleton7",false),
+    ("singleton42",false)
+]
+
+val tinySizesSoln = [
+    ("empty",0),
+    ("singleton7",1),
+    ("singleton42",1)
+]
+
+val tinyPredsSoln = [
+    ("empty",[]),
+    ("singleton7",[7]),
+    ("singleton42",[42])
+]
+
+val tinyStringsSoln = [
+    ("empty","{}"),
+    ("singleton7","{7}"),
+    ("singleton42","{42}")
+]
+*)
+
 val smallMembersSoln =
   [
-   ("empty",[]),
-   ("empty2",[]),
+    ("empty",[]),
+    ("empty2",[]),
+    ("singleton7",[7]),
+    ("singleton42",[42]),
    ("set_1_2_3",[1,2,3]), 
    ("s",[7]),
    ("s1",[17,19,23,42]),
@@ -143,6 +219,8 @@ val smallListsSoln =
   [
    ("empty",[]),
    ("empty2",[]),
+   ("singleton7",[7]),
+   ("singleton42",[42]),
    ("set_1_2_3",[1,2,3]), 
    ("s",[7]),
    ("s1",[17,19,23,42]),
@@ -161,6 +239,8 @@ val smallIsEmptiesSoln =
   [
    ("empty",true),
    ("empty2",true),
+   ("singleton7",false),
+   ("singleton42",false),
    ("set_1_2_3",false), 
    ("s",false),
    ("s1",false),
@@ -179,6 +259,8 @@ val smallSizesSoln =
   [
    ("empty",0),
    ("empty2",0),
+   ("singleton7",1),
+   ("singleton42",1),
    ("set_1_2_3",3), 
    ("s",1),
    ("s1",4),
@@ -197,6 +279,8 @@ val smallPredsSoln =
   [
    ("empty",[]),
    ("empty2",[]),
+   ("singleton7",[7]),
+   ("singleton42",[42]),
    ("set_1_2_3",[1,2,3]), 
    ("s",[7]),
    ("s1",[17,19,23,42]),
@@ -215,6 +299,8 @@ val smallStringsSoln =
   [
    ("empty","{}"),
    ("empty2","{}"),
+   ("singleton7","{7}"),
+   ("singleton42","{42}"),
    ("set_1_2_3","{1,2,3}"), 
    ("s","{7}"),
    ("s1","{42,23,19,17}"),
@@ -495,83 +581,132 @@ fun intToIntList i = [i]
 
 fun sortIntList ints = ListMergeSort.sort op> ints 
 
-fun intSetStringToSortedList intSetString = 
-    let val noCurlies = String.substring(intSetString, 1, String.size(intSetString)-2)
-	val intStrings = String.tokens (fn c => c = #",") noCurlies
+(* Many students omit curlies, and code that assume they're there
+   gives rise to exceptions that confuse testing. So correctly handle
+   case where there are no curlies!  *)
+
+fun removeCurlies setString = 
+    let val noInitialCurly = 
+	    if setString = "" orelse setString = "{" then
+		""
+	    else if String.isPrefix "{" setString then
+		String.extract(setString, 1, NONE)
+	    else 
+		setString
+	in let val sizeMinus1 = String.size(noInitialCurly)-1
+	       val noFinalCurly = 
+		   if noInitialCurly = "" orelse noInitialCurly = "}" then
+		       ""
+		   else if String.isSuffix "}" noInitialCurly then
+		       String.substring(noInitialCurly, 0, sizeMinus1)
+		   else
+		       noInitialCurly
+	   in noFinalCurly
+	   end
+	end
+
+fun intSetStringToSortedList sep intSetString = 
+    let val sepChar = String.sub(sep, 0) 
+	val noCurlies = removeCurlies intSetString
+	val intStrings = String.tokens (fn c => c = sepChar) noCurlies
 	val unsortedInts = List.map (fn s => Option.getOpt(Int.fromString s, 0)) intStrings
 	val sortedInts = sortIntList unsortedInts
     in sortedInts
     end
+
+fun canonicalizeSetString setString =
+    let val hasCurlies = String.isPrefix "{" setString orelse String.isSuffix "}" setString
+	val sep = if String.isSubstring "," setString then 
+		      ","
+		  else if String.isSubstring " " setString then 
+		      " "
+		  else
+		      "" (* kludge *)
+    in if sep = "" then
+	   setString (* If not standard separator, return unchanged *)
+       else
+	   let val sortedInts = intSetStringToSortedList sep setString 
+	       val separatedSortedIntsString = String.concatWith sep (map int sortedInts)
+	   in if hasCurlies then
+		  "{" ^ separatedSortedIntsString ^ "}"
+	      else
+		  separatedSortedIntsString
+	   end
+    end
+
+datatype test = IntListTest of string * (string * int list) list  * (string * int list) list
+	      | BoolTest of string * (string * bool) list * (string * bool) list
+	      | IntTest of string * (string * int) list * (string * int) list
+	      | StringTest of string * (string * string) list * (string * string) list
 	
-(* Must convert everything to list of integers! 
-*)
 val testCases =
-    [("smallMembers", smallMembers, smallMembersSoln),
-     ("smallLists", 
-      mapNamedTuples sortIntList smallLists, 
-      mapNamedTuples sortIntList smallListsSoln),
-     ("smallIsEmpties", 
-      mapNamedTuples boolToIntList smallIsEmpties, 
-      mapNamedTuples boolToIntList smallIsEmptiesSoln),
-     ("smallSizes", 
-      mapNamedTuples intToIntList smallSizes, 
-      mapNamedTuples intToIntList smallSizesSoln),
-     ("smallPreds", smallPreds, smallPredsSoln), 
-     ("smallStrings", 
-      mapNamedTuples intSetStringToSortedList smallStrings, 
-      mapNamedTuples intSetStringToSortedList smallStringsSoln),
-     ("bigMembers", bigMembers, bigMembersSoln), 
-     ("bigLists", 
-      mapNamedTuples sortIntList bigLists, 
-      mapNamedTuples sortIntList bigListsSoln),
-     ("bigIsEmpties", 
-      mapNamedTuples boolToIntList bigIsEmpties, 
-      mapNamedTuples boolToIntList bigIsEmptiesSoln),
-     ("bigSizes", 
-      mapNamedTuples intToIntList bigSizes, 
-      mapNamedTuples intToIntList bigSizesSoln),
-     ("bigPreds", bigPreds, bigPredsSoln),
-     ("bigStrings", 
-      mapNamedTuples intSetStringToSortedList bigStrings, 
-      mapNamedTuples intSetStringToSortedList bigStringsSoln), 
-     ("extraMembers", extraMembers, extraMembersSoln), 
-     ("extraLists", 
-      mapNamedTuples sortIntList extraLists, 
-      mapNamedTuples sortIntList extraListsSoln),
-     ("extraIsEmpties", 
-      mapNamedTuples boolToIntList extraIsEmpties, 
-      mapNamedTuples boolToIntList extraIsEmptiesSoln),
-     ("extraSizes", 
-      mapNamedTuples intToIntList extraSizes, 
-      mapNamedTuples intToIntList extraSizesSoln),
-     ("extraPreds", extraPreds, extraPredsSoln),
-     ("extraStrings", 
-      mapNamedTuples intSetStringToSortedList extraStrings, 
-      mapNamedTuples intSetStringToSortedList extraStringsSoln)
+    [
+ (*
+     IntListTest("tinyMembers", tinyMembers, tinyMembersSoln),
+     IntListTest("tinyLists", tinyLists, tinyListsSoln),
+     BoolTest("tinyIsEmpties", tinyIsEmpties, tinyIsEmptiesSoln),
+     IntTest("tinySizes", tinySizes, tinySizesSoln),
+     IntListTest("tinyPreds", tinyPreds, tinyPredsSoln),
+     StringTest("tinyStrings", tinyStrings, tinyStringsSoln),
+  *)
+
+     IntListTest("smallMembers", smallMembers, smallMembersSoln),
+     IntListTest("smallLists", 
+		 mapNamedTuples sortIntList smallLists, 
+		 mapNamedTuples sortIntList smallListsSoln),
+     BoolTest("smallIsEmpties", smallIsEmpties, smallIsEmptiesSoln),
+     IntTest("smallSizes", smallSizes, smallSizesSoln),
+     IntListTest("smallPreds", smallPreds, smallPredsSoln), 
+     StringTest("smallStrings", 
+		mapNamedTuples canonicalizeSetString smallStrings,
+		mapNamedTuples canonicalizeSetString smallStringsSoln),
+
+     IntListTest("bigMembers", bigMembers, bigMembersSoln), 
+     IntListTest("bigLists", 
+		 mapNamedTuples sortIntList bigLists, 
+		 mapNamedTuples sortIntList bigListsSoln), 
+     BoolTest("bigIsEmpties", bigIsEmpties, bigIsEmptiesSoln),
+     IntTest("bigSizes", bigSizes, bigSizesSoln),
+     IntListTest("bigPreds", bigPreds, bigPredsSoln),
+     StringTest("bigStrings", 
+		mapNamedTuples canonicalizeSetString bigStrings, 
+		mapNamedTuples canonicalizeSetString bigStringsSoln), 
+
+     IntListTest("extraMembers", extraMembers, extraMembersSoln), 
+     IntListTest("extraLists", 
+		 mapNamedTuples sortIntList extraLists, 
+		 mapNamedTuples sortIntList extraListsSoln),
+     BoolTest("extraIsEmpties", extraIsEmpties, extraIsEmptiesSoln),
+     IntTest("extraSizes", extraSizes, extraSizesSoln),
+     IntListTest("extraPreds", extraPreds, extraPredsSoln),
+     StringTest("extraStrings", 
+		mapNamedTuples canonicalizeSetString extraStrings, 
+		mapNamedTuples canonicalizeSetString extraStringsSoln)
     ]
 
 fun testString n = if n = 1 then "test" else "tests"
 
-fun testOneGroup (groupName, groupActual, groupExpected) = 
+fun testOne (name, toString, actual, expected, numPassed, numFailed) =
+    let val _ = print ("\n" ^ name ^ ": ")
+    in
+	if actual = expected then
+	    (print ("passed!"); 
+	     numPassed := (! numPassed) + 1)
+	else
+	    (print ("***FAILED!"); 
+	     print ("\n    actual: " ^ (toString actual));
+ 	     print ("\n  expected: " ^ (toString expected));
+	     numFailed := (! numFailed) + 1)
+    end
+
+fun helper(groupName, groupToString, groupActual, groupExpected) = 
     let val numPassed = ref 0
 	val numFailed = ref 0
-	fun testOne (name, actual, expected) =
-	    let val _ = print ("\n" ^ name ^ ": ")
-	    in
-		if actual = expected then
-		    (print ("passed!"); 
-		     numPassed := (! numPassed) + 1)
-		else
-		    (print ("***FAILED!"); 
-		     print ("\n    actual: " ^ (printIntList actual));
- 		     print ("\n  expected: " ^ (printIntList expected));
-		     numFailed := (! numFailed) + 1)
-	    end
     in
 	(print ("\n---------------------------------------"); 
 	 print ("\nTesting group " ^ groupName ^ ": "); 
 	 List.app (fn ((name, actual), (_, expected)) => 
-		      testOne(name, actual, expected))
+		      testOne(name, groupToString, actual, expected, numPassed, numFailed))
 		  (ListPair.zip(groupActual, groupExpected)); 
 	 let 
 	     val numTests = (! numPassed) + (! numFailed)
@@ -588,6 +723,11 @@ fun testOneGroup (groupName, groupActual, groupExpected) =
 	 in (! numPassed, ! numFailed)
 	 end)
     end
+
+fun testOneGroup (IntListTest(name,pairs1,pairs2)) = helper(name, list int, pairs1, pairs2)
+  | testOneGroup (BoolTest(name,pairs1,pairs2)) = helper(name, bool, pairs1, pairs2)
+  | testOneGroup (IntTest(name,pairs1,pairs2)) = helper(name, int, pairs1, pairs2)
+  | testOneGroup (StringTest(name,pairs1,pairs2)) = helper(name, quotedString, pairs1, pairs2)
 
 fun testAllCases(testCases) = 
     let val numPassed = ref 0
@@ -613,3 +753,8 @@ fun testAllCases(testCases) =
 fun testAll() = testAllCases(testCases)
                 handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn)); (false,~1,~1))
 
+val _ = Control.Print.printLength := 1000; 
+val _ = Control.Print.stringDepth := 1000; 
+val _ = testAll() (* force printing of test cases by side effect *)
+
+end (* struct *)
