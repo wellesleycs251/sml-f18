@@ -7,7 +7,7 @@ fun range lo hi =
 	lo :: (range (lo + 1) hi)
 
 fun takeUpTo n xs = 
-    List.take(xs, Int.min(length xs, n))
+    List.take(xs, Int.min(List.length xs, n))
 
 fun stringMake n chr = (* make a string with n copies of chr *)
   String.implode (List.map (fn _ => chr) (range 0 n))
