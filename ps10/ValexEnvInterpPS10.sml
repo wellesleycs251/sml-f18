@@ -1,8 +1,8 @@
 (* Environment model interpreter for Valex *)
-(* Do *not* edit this file for PS9. However, you may use it to test your
-   answers to PS9 Problems 5 and 6, as explained in the PS9 description. *)
+(* Do *not* edit this file for PS10. However, you may use it to test your
+   answers to PS10 Problem 4 as explained in the PS10 description. *)
 
-use "../ps10/ValexPS10.sml";
+use "ValexPS10.sml";
 use "../utils/Env.sml";
 use "../utils/Utils.sml";
 
