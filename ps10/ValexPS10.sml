@@ -1,9 +1,9 @@
 (***************************************************************
  This is a version of the Valex syntax file that you will
- extend for PS9 Problems 5 and 6. 
+ extend for PS10 Problem 4.
 
- Search for "PS9" to find the spots where you should add 
- your code for PS9 Problems 5 and 6.
+ Search for "PS10" to find the spots where you should add 
+ your code for PS10 Problems 4.
 ****************************************************************)
 
 (***************************************************************
