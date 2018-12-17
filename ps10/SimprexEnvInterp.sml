@@ -141,7 +141,7 @@ structure SimprexEnvInterp = struct
 		       ^ "Testing Simprex program file "
 		       ^ simprexFileName ^ "\n\n")
 	val simprexPgm = fileToPgm(simprexFileName)
-	val _ = print ("Simplrec program:\n"
+	val _ = print ("Simprex program:\n"
 		       ^ (pgmToString simprexPgm) ^ "\n\n")
 	fun intsToString ints = "[" ^ (String.concatWith
 					   ","
@@ -151,10 +151,12 @@ structure SimprexEnvInterp = struct
 	      val expectedResultString = Int.toString expectedResult
 	      val actualResultString = Int.toString (run simprexPgm args)
 				       handle SyntaxError msg =>
-					      ("Syntax error: " ^ msg)
+					      ("**Syntax error: " ^ msg)
 					    | EvalError msg =>
-					      ("Eval error: " ^ msg)
-					    | exn => (exnName exn) ^ ": "
+					      ("**Eval error: " ^ msg)
+					    | Option =>
+					      "**Unhandled Option exception: Option.valOf applied to NONE"
+					    | exn => "**Unhandled exception " ^ (exnName exn) ^ ": "
 						     ^ (exnMessage exn)
 	  in if actualResultString = expectedResultString
 	     then print ("program returned expected result " ^ expectedResultString ^ "\n\n")
@@ -165,6 +167,7 @@ structure SimprexEnvInterp = struct
 	  end
     in List.app testBehavior listOfArgListsAndResults
     end
+    handle SyntaxError msg => print ("**Syntax error: " ^ msg ^ "\n")
 
   (* Evaluation tests *)
   val evalTestCases = [
