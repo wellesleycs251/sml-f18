@@ -19,7 +19,7 @@ structure Show =
       val fcn: ('a -> 'b) t = fn f => "<fn>"
 
       val list: 'a t -> 'a list t =
-       fn showElt => fn elts => "[" ^ (String.concatWith "," (map showElt elts)) ^ "]"
+       fn showElt => fn elts => "[" ^ (String.concatWith "," (List.map showElt elts)) ^ "]"
 
       val pair: 'a t * 'b t -> ('a * 'b) t =
        fn (showa,showb) => fn (a,b) => "(" ^ showa a ^ "," ^ showb b ^ ")"
