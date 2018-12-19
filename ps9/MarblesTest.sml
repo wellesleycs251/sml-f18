@@ -2,7 +2,7 @@ use "../utils/Tester.sml";
 use "../utils/Show.sml";
 open Show; (* toString functions *)
 use "MarblesTableSoln.sml";
-use "marbles.sml"; (* change this to be yourAccountName-marbles.sml *)
+use "marbles.sml";
 
 signature MARBLES_TEST = sig
 val testMarbles: unit -> bool * int * int
@@ -20,7 +20,7 @@ fun range lo hi = (* list all ints from lo up to (but not including) hi *)
 fun uncurry2 f = fn (a, b) => f a b
 
 fun cartesianProduct xs ys =
-    foldr (fn (x, subres) => (map (curriedPair x) ys) @ subres)
+    foldr (fn (x, subres) => (List.map (curriedPair x) ys) @ subres)
           [] 
           xs
 
