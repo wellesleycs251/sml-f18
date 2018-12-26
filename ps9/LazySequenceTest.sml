@@ -27,8 +27,9 @@ val numFailed = ref 0
  Helper functions
  ********************************************************************************)
 
-fun checkResult (name, resultToString, actual, expected) = 
+fun checkResult (name, resultToString, expected, actualThunk) = 
     let val _ = print ("\n" ^ name ^ ": ")
+	val actual = actualThunk()
     in if actual = expected then 
 	   (numPassed := 1 + !numPassed; 
 	    print "passed")
@@ -40,23 +41,26 @@ fun checkResult (name, resultToString, actual, expected) =
 	    print "\n   actual: "; 
 	    print (resultToString actual))
     end
+    handle (IndexOutOfBounds n) => 
+	   (numFailed := 1 + !numFailed; 
+	    print ("***ERROR: IndexOutOfBounds -- " ^ (Int.toString n)))
+	 | exn => (numFailed := 1 + !numFailed; 
+		   print ("***ERROR: " ^ (exnName exn) ^ " -- " ^ (exnMessage exn)))
 
 fun testLength (name, seq, expected) = 
-    checkResult ("testLength " ^ name, int, length seq, expected)
+    checkResult ("testLength " ^ name, int, expected, fn () => length seq)
 
 fun testToList (name, seq, eltToString, expected) = 
-    checkResult ("testToList " ^ name, list eltToString, toList seq, expected)
+    checkResult ("testToList " ^ name, list eltToString, expected, fn () =>  toList seq)
 
 fun testGet (name, seq, eltToString, expected) = 
-    let val actual = (List.map (fn index => (index, get index seq)) (Utils.range 0 (length seq))
-                      handle Unimplemented => [])
-    in checkResult ("testGet " ^ name, list(pair(int,eltToString)), actual, expected)
+    let fun actualThunk () = List.map (fn index => (index, get index seq)) (Utils.range 0 (length seq))
+    in checkResult ("testGet " ^ name, list(pair(int,eltToString)), expected, actualThunk)
     end
 	   
 fun testGetRange (name, seq, lo, hi, eltToString, expected) =
-    let val actual = (List.map (fn index => (index, get index seq)) (Utils.range lo hi)
-		      handle Unimplemented => [])
-    in checkResult ("testGetRange " ^ name, list(pair(int,eltToString)), actual, expected)
+    let fun actualThunk () = List.map (fn index => (index, get index seq)) (Utils.range lo hi)
+    in checkResult ("testGetRange " ^ name, list(pair(int,eltToString)), expected, actualThunk)
     end
 
 fun testGetRangeHandleException (name, seq, lo, hi, eltToString, expected) =
@@ -64,9 +68,10 @@ fun testGetRangeHandleException (name, seq, lo, hi, eltToString, expected) =
 	eltToString(get index seq)
         handle  (IndexOutOfBounds n) => "Error: IndexOutOfBounds -- " ^ (Int.toString n)
 	     |   exn => "Error: " ^ (exnName exn) ^ " -- " ^ (exnMessage exn)
-      val actual = List.map (fn index => (index, getHandleException(index)))
-			    (Utils.range lo hi)
-  in checkResult ("testGetRangeHandleException " ^ name, list(pair(int,quotedString)), actual, expected)
+      fun actualThunk () = List.map (fn index => (index, getHandleException(index)))
+				    (Utils.range lo hi)
+  in checkResult ("testGetRangeHandleException " ^ name, list(pair(int,quotedString)),
+		  expected, actualThunk)
   end
 
 fun printStars() = print "\n************************************************************"
@@ -898,4 +903,3 @@ print "\n"
 )
 
 end
-
