@@ -34,38 +34,36 @@ val range = Utils.range
 (* Lyn sez: should really functorize the following tests. *)
 
 (* Some small sets defined without fromList *)
-val s = (delete 4 (difference (union (union (insert 1 empty)
-                                            (insert 4 empty))
-                              (union (insert 7 empty)
-                                     (insert 4 empty)))
-                  (intersection (insert 1 empty)
-                                (union (insert 1 empty)
-                                       (insert 6 empty)))))
-val s1 = insert 17 (insert 19 (insert 23 (singleton 42)))
-val s2 = insert 17 (insert 23 (insert 42 (insert 57 (insert 97 (empty)))))
-val s3 = delete 19 (delete 57 (delete 85 s2))
-val dupSet = insert 3 (insert 2 (insert 3 (insert 1 (insert 3 (insert 2 (empty))))))
+val s = fn () => (delete 4 (difference (union (union (insert 1 empty)
+						     (insert 4 empty))
+					      (union (insert 7 empty)
+						     (insert 4 empty)))
+				       (intersection (insert 1 empty)
+						     (union (insert 1 empty)
+							    (insert 6 empty)))))
+val s1 = fn () => insert 17 (insert 19 (insert 23 (singleton 42)))
+val s2 = fn () => insert 17 (insert 23 (insert 42 (insert 57 (insert 97 (empty)))))
+val s3 = fn () => delete 19 (delete 57 (delete 85 (s2 ())))
+val dupSet = fn () => insert 3 (insert 2 (insert 3 (insert 1 (insert 3 (insert 2 (empty))))))
 		
-val s1UnionS2 = union s1 s2
-val s1IntersectionS2 = intersection s1 s2
-val s1DifferenceS2 = difference s1 s2
-val s2DifferenceS1 = difference s2 s1
-val intersectionSmallDiffs = intersection s2DifferenceS1 s1DifferenceS2
+val s1UnionS2 = fn () => union (s1 ()) (s2 ())
+val s1IntersectionS2 = fn () => intersection (s1 ()) (s2 ())
+val s1DifferenceS2 = fn () => difference (s1 ()) (s2 ())
+val s2DifferenceS1 = fn () => difference (s2 ()) (s1 ())
+val intersectionSmallDiffs = fn () => intersection (s2DifferenceS1 ()) (s1DifferenceS2 ())
 
-(*
-val tinySets = [
-    ("empty", empty), 
-    ("singleton7", singleton 7),
-    ("singleton42", singleton 42)
+val tinySetThunks = [
+    ("empty", fn () => empty), 
+    ("singleton7", fn () => singleton 7),
+    ("singleton42", fn () => singleton 42)
 ]
-*)
 
-val smallSets = [
-    ("empty", empty), 
-    ("empty2",fromList []),
-    ("singleton7", singleton 7),
-    ("singleton42", singleton 42),
-    ("set_1_2_3", fromList [1,2,3]), (* tests for quirks in odd-length lists *)
+val smallSetThunks = [
+    ("empty", fn () => empty), 
+    ("empty2", fn () => fromList []),
+    ("singleton7", fn () => singleton 7),
+    ("singleton42", fn () => singleton 42),
+    ("set_1_2_3", fn () => fromList [1,2,3]), (* tests for quirks in odd-length lists *)
     ("s", s), 
     ("s1", s1), 
     ("s2", s2),
@@ -76,29 +74,29 @@ val smallSets = [
     ("s1DifferenceS2", s1DifferenceS2),
     ("s2DifferenceS1", s2DifferenceS1), 
     ("intersectionSmallDiffs", intersectionSmallDiffs), 
-    ("smallDelete", delete 1 (fromList [1,2])) (* test deletion from set in which elt appears *)
+    ("smallDelete", fn() => delete 1 (fromList [1,2])) (* test deletion from set in which elt appears *)
 ]
 
-val lowSet = fromList (range 0 61)
-val highSet = fromList (range 40 101)
-val lowUnionHighSet = union lowSet highSet
-val lowInsersectionHighSet = intersection lowSet highSet
-val lowDifferenceHighSet = difference lowSet highSet
-val highDifferenceLowSet = difference highSet lowSet
-val intersectionLowHighDiffsSet = intersection lowDifferenceHighSet highDifferenceLowSet
-val mod2Set = fromList (List.filter (fn x => x mod 2 = 0) (range 0 101))
-val mod3Set = fromList (List.filter (fn x => x mod 3 = 0) (range 0 101))
-val mod2UnionMod3Set = union mod2Set mod3Set
-val mod2IntersectionMod3Set = intersection mod2Set mod3Set
-val mod2DifferenceMod3Set = difference mod2Set mod3Set
-val mod3DifferenceMod2Set = difference mod3Set mod2Set
-val intersectionModDiffsSet = intersection mod2DifferenceMod3Set mod3DifferenceMod2Set
-val bigIntersectionSet = intersection (intersection lowSet highSet)
-				      (intersection mod2Set mod3Set)
-val bigDifferenceSet = difference (difference lowSet highSet)
-  				  (difference mod2Set mod3Set)
+val lowSet = fn () => fromList (range 0 61)
+val highSet = fn () => fromList (range 40 101)
+val lowUnionHighSet = fn () => union (lowSet ()) (highSet ())
+val lowInsersectionHighSet = fn () => intersection (lowSet ()) (highSet ())
+val lowDifferenceHighSet = fn () => difference (lowSet ()) (highSet ())
+val highDifferenceLowSet = fn () => difference (highSet ()) (lowSet ())
+val intersectionLowHighDiffsSet = fn () => intersection (lowDifferenceHighSet ()) (highDifferenceLowSet ())
+val mod2Set = fn () => fromList (List.filter (fn x => x mod 2 = 0) (range 0 101))
+val mod3Set = fn () => fromList (List.filter (fn x => x mod 3 = 0) (range 0 101))
+val mod2UnionMod3Set = fn () => union (mod2Set ()) (mod3Set ())
+val mod2IntersectionMod3Set = fn () => intersection (mod2Set ()) (mod3Set ())
+val mod2DifferenceMod3Set = fn () => difference (mod2Set ()) (mod3Set ())
+val mod3DifferenceMod2Set = fn () => difference (mod3Set ()) (mod2Set ())
+val intersectionModDiffsSet = fn () => intersection (mod2DifferenceMod3Set ()) (mod3DifferenceMod2Set ())
+val bigIntersectionSet = fn () => intersection (intersection (lowSet ()) (highSet()))
+					       (intersection (mod2Set ()) (mod3Set ()))
+val bigDifferenceSet = fn () => difference (difference (lowSet ()) (highSet ()))
+  					   (difference (mod2Set ()) (mod3Set ()))
 
-val bigSets = [
+val bigSetThunks = [
     ("lowSet", lowSet),
     ("highSet", highSet),
     ("lowUnionHighSet", lowUnionHighSet),
@@ -118,27 +116,25 @@ val bigSets = [
 ]
 
 (* Tests of other operations on small sets *)
-fun mapNamedSet f namedSets = map (fn (name,set) => (name,f set)) namedSets
+fun mapNamedSetThunk f namedSetThunks = map (fn (name,setThunk) => (name, fn () => (f (setThunk())))) namedSetThunks
 fun testMember set = List.filter (fn i => member i set) (range 0 101)
                      handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn)); [])
 fun testPred set = List.filter (toPred set) (range 0 101)
                    handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn)); [])
 
-(*
-val tinyMembers = mapNamedSet testMember tinySets   
-val tinyLists = mapNamedSet toList tinySets		    		    
-val tinyIsEmpties = mapNamedSet isEmpty tinySets		    
-val tinySizes = mapNamedSet size tinySets
-val tinyPreds = mapNamedSet testPred tinySets
-val tinyStrings = mapNamedSet (fn s => toString Int.toString s) tinySets
-*)
+val tinyMembers = mapNamedSetThunk testMember tinySetThunks   
+val tinyLists = mapNamedSetThunk toList tinySetThunks		    		    
+val tinyIsEmpties = mapNamedSetThunk isEmpty tinySetThunks		    
+val tinySizes = mapNamedSetThunk size tinySetThunks
+val tinyPreds = mapNamedSetThunk testPred tinySetThunks
+val tinyStrings = mapNamedSetThunk (fn s => toString Int.toString s) tinySetThunks
 			       
-val smallMembers = mapNamedSet testMember smallSets   
-val smallLists = mapNamedSet toList smallSets		    		    
-val smallIsEmpties = mapNamedSet isEmpty smallSets		    
-val smallSizes = mapNamedSet size smallSets
-val smallPreds = mapNamedSet testPred smallSets
-val smallStrings = mapNamedSet (fn s => toString Int.toString s) smallSets
+val smallMembers = mapNamedSetThunk testMember smallSetThunks   
+val smallLists = mapNamedSetThunk toList smallSetThunks		    		    
+val smallIsEmpties = mapNamedSetThunk isEmpty smallSetThunks		    
+val smallSizes = mapNamedSetThunk size smallSetThunks
+val smallPreds = mapNamedSetThunk testPred smallSetThunks
+val smallStrings = mapNamedSetThunk (fn s => toString Int.toString s) smallSetThunks
 
 (* Tests involving "big" sets defined with fromList *)
 
@@ -148,14 +144,13 @@ fun intersectionTree(min, rangeLo, rangeHi, max, diff) =
     else intersection (intersectionTree(min, rangeLo - diff, rangeHi, max, diff))
 		      (intersectionTree(min, rangeLo, rangeHi + diff, max, diff))
 
-val bigMembers = mapNamedSet testMember bigSets		    		    
-val bigLists = mapNamedSet toList bigSets		    		    
-val bigIsEmpties = mapNamedSet isEmpty bigSets		    
-val bigSizes = mapNamedSet size bigSets
-val bigPreds = mapNamedSet testPred bigSets
-val bigStrings = mapNamedSet (fn s => toString Int.toString s) bigSets
+val bigMembers = mapNamedSetThunk testMember bigSetThunks		    		    
+val bigLists = mapNamedSetThunk toList bigSetThunks		    		    
+val bigIsEmpties = mapNamedSetThunk isEmpty bigSetThunks		    
+val bigSizes = mapNamedSetThunk size bigSetThunks
+val bigPreds = mapNamedSetThunk testPred bigSetThunks
+val bigStrings = mapNamedSetThunk (fn s => toString Int.toString s) bigSetThunks
 
-(*
 val tinyMembersSoln = [
     ("empty",[]),
     ("singleton7",[7]),
@@ -191,7 +186,6 @@ val tinyStringsSoln = [
     ("singleton7","{7}"),
     ("singleton42","{42}")
 ]
-*)
 
 val smallMembersSoln =
   [
@@ -528,16 +522,16 @@ val bigStringsSoln =
     "{39,37,36,35,33,31,30,29,27,25,24,23,21,19,18,17,15,13,12,11,9,7,6,5,3,1,0}")
   ]
 
-val intersectionSet = intersectionTree(0, 45, 55, 100, 10)
+val intersectionSetThunk = fn () => intersectionTree(0, 45, 55, 100, 10)
 
-val extraSets = [("intersectionSet", intersectionSet)]
+val extraSetThunks = [("intersectionSet", intersectionSetThunk)]
 
-val extraMembers = mapNamedSet testMember extraSets		    		    
-val extraLists = mapNamedSet toList extraSets		    		    
-val extraIsEmpties = mapNamedSet isEmpty extraSets		    
-val extraSizes = mapNamedSet size extraSets
-val extraPreds = mapNamedSet testPred extraSets
-val extraStrings = mapNamedSet (fn s => toString Int.toString s) extraSets
+val extraMembers = mapNamedSetThunk testMember extraSetThunks		    		    
+val extraLists = mapNamedSetThunk toList extraSetThunks		    		    
+val extraIsEmpties = mapNamedSetThunk isEmpty extraSetThunks		    
+val extraSizes = mapNamedSetThunk size extraSetThunks
+val extraPreds = mapNamedSetThunk testPred extraSetThunks
+val extraStrings = mapNamedSetThunk (fn s => toString Int.toString s) extraSetThunks
 
 val extraMembersSoln = [
    ("intersectionSet",
@@ -572,6 +566,17 @@ fun mapNamedTuples f namedTuples =
 		                 handle exn => (print ("***ERROR in " ^ name ^ "**: " ^ (exnName exn) ^ " " ^ (exnMessage exn) ^ "\n"); raise exn))
 	     namedTuples
     handle exn => (print ("***ERROR**: " ^ (exnName exn) ^ " " ^ (exnMessage exn) ^ "\n"); [])
+
+fun mapNamedThunkTuples f namedThunkTuples = 
+    List.map (fn (name, thunk) => 
+		 let fun newThunk () = 
+			 let val valu = thunk ()
+			 in f valu
+			 end
+	                 handle exn => (print ("***ERROR in " ^ name ^ "**: " ^ (exnName exn) ^ " " ^ (exnMessage exn) ^ "\n"); raise exn)
+		 in (name, newThunk)
+		 end)
+	     namedThunkTuples
 
 fun boolToIntList false = [0]
   | boolToIntList true = [1]
@@ -633,60 +638,60 @@ fun canonicalizeSetString setString =
 	   end
     end
 
-datatype test = IntListTest of string * (string * int list) list  * (string * int list) list
-	      | BoolTest of string * (string * bool) list * (string * bool) list
-	      | IntTest of string * (string * int) list * (string * int) list
-	      | StringTest of string * (string * string) list * (string * string) list
+datatype test = IntListTest of string * (string * (unit -> int list)) list  * (string * int list) list
+	      | BoolTest of string * (string * (unit -> bool)) list * (string * bool) list
+	      | IntTest of string * (string * (unit -> int)) list * (string * int) list
+	      | StringTest of string * (string * (unit -> string)) list * (string * string) list
 	
 val testCases =
     [
- (*
+
      IntListTest("tinyMembers", tinyMembers, tinyMembersSoln),
      IntListTest("tinyLists", tinyLists, tinyListsSoln),
      BoolTest("tinyIsEmpties", tinyIsEmpties, tinyIsEmptiesSoln),
      IntTest("tinySizes", tinySizes, tinySizesSoln),
      IntListTest("tinyPreds", tinyPreds, tinyPredsSoln),
      StringTest("tinyStrings", tinyStrings, tinyStringsSoln),
-  *)
 
      IntListTest("smallMembers", smallMembers, smallMembersSoln),
      IntListTest("smallLists", 
-		 mapNamedTuples sortIntList smallLists, 
+		 mapNamedThunkTuples sortIntList smallLists, 
 		 mapNamedTuples sortIntList smallListsSoln),
      BoolTest("smallIsEmpties", smallIsEmpties, smallIsEmptiesSoln),
      IntTest("smallSizes", smallSizes, smallSizesSoln),
      IntListTest("smallPreds", smallPreds, smallPredsSoln), 
      StringTest("smallStrings", 
-		mapNamedTuples canonicalizeSetString smallStrings,
+		mapNamedThunkTuples canonicalizeSetString smallStrings,
 		mapNamedTuples canonicalizeSetString smallStringsSoln),
 
      IntListTest("bigMembers", bigMembers, bigMembersSoln), 
      IntListTest("bigLists", 
-		 mapNamedTuples sortIntList bigLists, 
+		 mapNamedThunkTuples sortIntList bigLists, 
 		 mapNamedTuples sortIntList bigListsSoln), 
      BoolTest("bigIsEmpties", bigIsEmpties, bigIsEmptiesSoln),
      IntTest("bigSizes", bigSizes, bigSizesSoln),
      IntListTest("bigPreds", bigPreds, bigPredsSoln),
      StringTest("bigStrings", 
-		mapNamedTuples canonicalizeSetString bigStrings, 
+		mapNamedThunkTuples canonicalizeSetString bigStrings, 
 		mapNamedTuples canonicalizeSetString bigStringsSoln), 
 
      IntListTest("extraMembers", extraMembers, extraMembersSoln), 
      IntListTest("extraLists", 
-		 mapNamedTuples sortIntList extraLists, 
+		 mapNamedThunkTuples sortIntList extraLists, 
 		 mapNamedTuples sortIntList extraListsSoln),
      BoolTest("extraIsEmpties", extraIsEmpties, extraIsEmptiesSoln),
      IntTest("extraSizes", extraSizes, extraSizesSoln),
      IntListTest("extraPreds", extraPreds, extraPredsSoln),
      StringTest("extraStrings", 
-		mapNamedTuples canonicalizeSetString extraStrings, 
+		mapNamedThunkTuples canonicalizeSetString extraStrings, 
 		mapNamedTuples canonicalizeSetString extraStringsSoln)
     ]
 
 fun testString n = if n = 1 then "test" else "tests"
 
-fun testOne (name, toString, actual, expected, numPassed, numFailed) =
+fun testOne (name, toString, actualThunk, expected, numPassed, numFailed) =
     let val _ = print ("\n" ^ name ^ ": ")
+	val actual = actualThunk ()
     in
 	if actual = expected then
 	    (print ("passed!"); 
@@ -704,8 +709,8 @@ fun helper(groupName, groupToString, groupActual, groupExpected) =
     in
 	(print ("\n---------------------------------------"); 
 	 print ("\nTesting group " ^ groupName ^ ": "); 
-	 List.app (fn ((name, actual), (_, expected)) => 
-		      testOne(name, groupToString, actual, expected, numPassed, numFailed))
+	 List.app (fn ((name, actualThunk), (_, expected)) => 
+		      testOne(name, groupToString, actualThunk, expected, numPassed, numFailed))
 		  (ListPair.zip(groupActual, groupExpected)); 
 	 let 
 	     val numTests = (! numPassed) + (! numFailed)
