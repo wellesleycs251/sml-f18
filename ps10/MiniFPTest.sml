@@ -215,6 +215,8 @@ structure MiniFPTest = struct
       objToString (apply (stringToFunForm funString) (stringToObj objString))
       handle (EvalError msg) => "Error: " ^ msg
 	   | (SyntaxError msg) => "Error:" ^ msg
+	   (* Added by Lyn on 2019/01/04 *)
+	   | exn => "Error: " ^ (exnName exn) ^ " " ^ (exnMessage exn)
 
   and callToString (funString, objString) = "apply " ^ funString ^ " " ^ objString
 
